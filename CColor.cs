@@ -1,24 +1,46 @@
-﻿public enum CColoring
+﻿namespace TextComparision;
+
+/// <summary>
+/// This is used for Coloring Word Status
+/// </summary>
+
+public enum ColoringEnum
 {
-    CORRECTION,
-    ADDED,
-    DELETED
+    /// <summary>
+    /// This value is used when a revised word is correct 
+    /// </summary>
+    Correction,
+
+    /// <summary>
+    /// This value is used when a word is added
+    /// </summary>
+    Added,
+
+    /// <summary>
+    /// This value is used when a word is deleted
+    /// </summary>
+    Deleted
 }
 
 public static class CColoringExtensions
 {
-    public static string GetColor(this CColoring cColoring)
+    /// <summary>
+    /// Error message when there is not color that match the required color
+    /// </summary>
+    private const string ErrorMessage = "Invalid CColoring value.";
+
+    public static string GetColor(ColoringEnum cColoring)
     {
         switch (cColoring)
         {
-            case CColoring.CORRECTION:
+            case ColoringEnum.Correction:
                 return "green";
-            case CColoring.ADDED:
+            case ColoringEnum.Added:
                 return "red";
-            case CColoring.DELETED:
+            case ColoringEnum.Deleted:
                 return "grey";
             default:
-                throw new ArgumentException("Invalid CColoring value.");
+                throw new ArgumentException(ErrorMessage);
         }
     }
 }

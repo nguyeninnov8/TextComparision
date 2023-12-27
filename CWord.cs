@@ -1,32 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace TextComparision
 {
-    internal class CWord
+    public class CWord
     {
-        private String word;
-        private CColoring color;
+        /// <summary>
+        /// This is the compared word
+        /// </summary>
+        public string Word { get; set; }
 
-        public CWord(String word, CColoring color)
-        {
-            this.word = word;   
-            this.color = color;
-        }
+        /// <summary>
+        /// This is the status of the compared word
+        /// </summary>
+        public ColoringEnum Color { get; set; }
 
-        public String Word
+        public CWord(string word, ColoringEnum color)
         {
-            get { return word; }
-            set { this.word = value; }
-        }
-
-        public CColoring Color
-        {
-            get { return color; }
-            set { this.color = value; }
+            this.Word = word;   
+            this.Color = color;
         }
     }
 }

@@ -4,10 +4,11 @@
     {
         static void Main(string[] args)
         {
-            String str1 = "The room is too small";
-            String str2 = "rooms room are is to too small";
+            string str1 = "The room is too small";
+            string str2 = "Your rooms room is are to too small";
             CTextCompare tc = new CTextCompare(str1, str2);
-            Console.WriteLine(tc.CompareIt());
+            var res = tc.CompareIt();
+            CTextCompare.ToConsole(res);
         }
     }
 }

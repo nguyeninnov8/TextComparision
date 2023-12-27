@@ -1,106 +1,131 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TextComparision;
+﻿using System.Text;
+
+namespace TextComparision;
 
 public class CTextCompare
 {
-    private string[] aOriginal;
-    private string[] aRevised;
-    private bool isSensitive = false;
-    private int nAlternativeWords = 1;
+    /// <summary>
+    /// This array is used to contain the original word after splitting
+    /// </summary>
+    private string[] AOriginal { get; set; }
 
+    /// <summary>
+    /// This array is used to contain the revised word after splitting
+    /// </summary>
+    private string[] ARevised { get; set; }
+
+
+    /// <summary>
+    /// Used when checking if the user when to check sensitive case
+    /// </summary>
+    private bool IsSensitive { get; set; } = false;
+
+    /// <summary>
+    /// This is the variable used when a word in the original sentence does not match a word in the revised sentence.
+    /// It will check the next word in the consecutive revised sentence corresponding to the number of times given by this variable
+    /// </summary>
+    private int NAlternativeWords { get; set; } = 2;
+
+
+    /// <summary>
+    /// when using this constructor to create a new constant of ctextcompare
+    /// the isSensitive is
+    /// the nNalternativewords = 1
+    /// by default
+    /// </summary>
     public CTextCompare(string originalSentence, string revisedSentence)
     {
-        this.aOriginal = originalSentence.Split(' ');
-        this.aRevised = revisedSentence.Split(' ');
+        this.AOriginal = originalSentence.Split(' ');
+        this.ARevised = revisedSentence.Split(' ');
     }
 
-    public string[] AOriginal
+    // This is another constructor, with 2 more parameters which are isSensitive for checking Sensitive case and nAlternativeWords
+    public CTextCompare(string originalSentence, string revisedSentence, bool isSensitive, int nAlternativeWords)
     {
-        get { return aOriginal; }
-        set { aOriginal = value; }
+        this.AOriginal = originalSentence.Split(' ');
+        this.ARevised = revisedSentence.Split(' ');
+        this.IsSensitive = isSensitive;
+        this.NAlternativeWords = nAlternativeWords;
     }
 
-    public string[] ARevised
-    {
-        get { return aRevised; }
-        set { aRevised = value; }
-    }
 
-    public bool IsSensitive
-    {
-        get { return isSensitive; }
-        set { isSensitive = value; }
-    }
-
-    public int NAlternativeWords
-    {
-        get { return nAlternativeWords; }
-        set { nAlternativeWords = value; }
-    }
 
     private bool IsMatched(string word1, string word2)
     {
-        if (isSensitive)
-        {
-            return word1.Equals(word2);
-        }
-        else
-        {
-            return word1.Equals(word2, StringComparison.OrdinalIgnoreCase);
-        }
+        return IsSensitive ? word1.Equals(word2) : word1.Equals(word2, StringComparison.OrdinalIgnoreCase);
     }
 
-    public string CompareIt()
+    public List<CWord> CompareIt()
     {
-        List<CWord> result = new List<CWord>();
-        int i = 0;
-        int j = 0;
-        while (i < aOriginal.Length && j < aRevised.Length)
+        
+        var resultList = new List<CWord>();
+
+        // This is the index of Original Array
+        var i = 0;
+        
+        // This is the index of Revised Array
+        var j = 0;
+        while (i < AOriginal.Length && j < ARevised.Length)
         {
+
             // Check if aOriginal[i], aRevised[j] are equal.
             // If they are equal, "Coloring" aOriginal[i] word.
-            if (IsMatched(aOriginal[i], aRevised[j]))
+            if (IsMatched(AOriginal[i], ARevised[j]))
             {
-                result.Add(new CWord(aOriginal[i], CColoring.CORRECTION));
+                resultList.Add(new CWord(AOriginal[i], ColoringEnum.Correction));
                 i++;
                 j++;
             }
+
+            // If returned false, It gonna check the n (NAlternativeWords) words by increasing to the right of the revised sentence.
             else
             {
-                bool alternativeMatch = false;
-                int k = 1;
-                for (; k <= nAlternativeWords && (j + k) < aRevised.Length; k++)
+                // If there is alternative match found it gonna be true. But by default, it is false
+                var alternativeMatch = false;
+
+                // This variable is used as an index for looping to n (NAlternativeWords) times to find the desired word
+                var k = 1;
+                for (; k <= NAlternativeWords && (j + k) < ARevised.Length; k++)
                 {
-                    if (IsMatched(aOriginal[i], aRevised[j + k]))
-                    {
-                        alternativeMatch = true;
-                        break;
-                    }
+                    // Check if not matched, then continue
+                    if (!IsMatched(AOriginal[i], ARevised[j + k])) continue;
+
+                    // if it is true, the alternativeMatch change to true
+                    alternativeMatch = true;
+                    break;
                 }
 
+                // If the alternativeMatch is true, we will process to add words into result
                 if (alternativeMatch)
                 {
-                    for (int addedCount = 0; addedCount < k; addedCount++)
+                    for (var addedCount = 0; addedCount < k; addedCount++)
                     {
-                        result.Add(new CWord(aRevised[j + addedCount], CColoring.ADDED));
+                        resultList.Add(new CWord(ARevised[j + addedCount], ColoringEnum.Added));
                     }
-                    result.Add(new CWord(aOriginal[i], CColoring.CORRECTION));
+                    resultList.Add(new CWord(AOriginal[i], ColoringEnum.Correction));
                     i++;
+
+                    // We will not check the added words again from the Revised Array, so increasing the index of Revised Array to the index where the desired word by one
                     j = j + k + 1;
                 }
+
+                //If not, we will add the value of Original Array into 
                 else
                 {
-                    result.Add(new CWord(aOriginal[i], CColoring.DELETED));
+                    resultList.Add(new CWord(AOriginal[i], ColoringEnum.Deleted));
                     i++;
                 }
             }
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
+        return resultList;
+    }
 
-        foreach (CWord word in result)
+    public static void ToConsole(List<CWord> resultList)
+    {
+        var stringBuilder = new StringBuilder();
+
+        foreach (var word in resultList)
         {
             stringBuilder.Append("{ ");
             stringBuilder.Append(word.Word);
@@ -109,12 +134,12 @@ public class CTextCompare
             stringBuilder.Append("} },\n");
         }
 
-        // Remove the trailing comma and newline
+
         if (stringBuilder.Length > 0)
         {
             stringBuilder.Length -= 2;
         }
 
-        return stringBuilder.ToString();
+        Console.WriteLine(stringBuilder);
     }
 }
